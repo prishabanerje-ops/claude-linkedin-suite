@@ -1,0 +1,7 @@
+# The current skills (post, image, feed/post comments) use ONLY the Python
+# standard library — nothing to install here. Python 3.9+ is enough.
+#
+# FUTURE (per docs/2026-07-03-linkedin-reach-optimization-design.md — the
+# carousel/document pipeline, not yet built): uncomment when implemented.
+# playwright>=1.44     # headless Chromium → PDF for document carousels
+# weasyprint>=61       # lighter pure-Python HTML→PDF fallback

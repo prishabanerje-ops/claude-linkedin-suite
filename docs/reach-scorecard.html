@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LinkedIn Reach Scorecard — Aakash Srivastava</title>
+<style>
+  :root{
+    --ink:#141C28; --ink-2:#33404F; --muted:#66717F; --faint:#98A2B0;
+    --paper:#EEF1F5; --card:#FFFFFF; --card-2:#F8FAFC;
+    --line:#DEE3EA; --line-strong:#C6CEDA;
+    --accent:#1B4DE4; --accent-ink:#123AB8; --accent-wash:#E9EFFF;
+    --good:#0E9F6E; --good-wash:#E1F4EC; --good-ink:#0A7A54;
+    --warn:#B8730A; --warn-wash:#FAF0DC; --warn-ink:#8E5806;
+    --crit:#CE3F30; --crit-wash:#FBE7E3; --crit-ink:#A62E22;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--paper)}
+  .wrap{
+    max-width:1040px;margin:0 auto;padding:clamp(20px,4vw,56px) clamp(16px,4vw,40px) 72px;
+    background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent-ink);font-weight:600;
+  }
+  h1{
+    font-size:clamp(28px,5vw,44px);line-height:1.04;margin:.28em 0 .12em;
+    letter-spacing:-.02em;font-weight:800;text-wrap:balance;
+  }
+  h2{
+    font-size:clamp(19px,2.6vw,24px);letter-spacing:-.01em;font-weight:750;margin:0;
+    text-wrap:balance;
+  }
+  h3{font-size:16px;font-weight:700;margin:0;letter-spacing:-.005em}
+  p{margin:0}
+  .lede{font-size:clamp(15px,1.7vw,18px);color:var(--ink-2);max-width:65ch;line-height:1.55}
+  .tnum{font-variant-numeric:tabular-nums}
+  a{color:var(--accent-ink)}
+
+  .masthead{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:30px}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{
+    font-family:var(--mono);font-size:12px;letter-spacing:.02em;
+    background:var(--card);border:1px solid var(--line-strong);border-radius:100px;
+    padding:5px 12px;color:var(--ink-2);display:inline-flex;gap:7px;align-items:center;
+  }
+  .chip b{color:var(--ink);font-weight:700}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+
+  .verdict{
+    background:var(--ink);color:#EAF0FA;border-radius:8px;
+    padding:clamp(20px,3vw,30px);margin-bottom:34px;position:relative;overflow:hidden;
+  }
+  .verdict .eyebrow{color:#7FA1FF}
+  .verdict-head{font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-.02em;line-height:1.12;margin:.4em 0 .5em;text-wrap:balance}
+  .verdict-head .hi{color:#8FB0FF}
+  .verdict p{color:#B7C2D4;max-width:70ch;font-size:15px}
+  .verdict .rail{position:absolute;top:0;right:0;bottom:0;width:6px;background:linear-gradient(var(--crit),var(--warn),var(--good))}
+
+  section{margin-bottom:40px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .sec-head .idx{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:600}
+  .sec-sub{color:var(--muted);font-size:14px;margin-top:-8px;margin-bottom:18px;max-width:70ch}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px 16px 15px;display:flex;flex-direction:column;gap:3px}
+  .tile .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .tile .val{font-size:clamp(26px,3.4vw,32px);font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  .tile .sub{font-size:12.5px;color:var(--muted)}
+  .tile .state{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:6px;display:inline-flex;align-items:center;gap:5px;align-self:flex-start;padding:3px 9px;border-radius:100px}
+  .st-good{background:var(--good-wash);color:var(--good-ink)}
+  .st-warn{background:var(--warn-wash);color:var(--warn-ink)}
+  .st-crit{background:var(--crit-wash);color:var(--crit-ink)}
+  .st-neutral{background:var(--card-2);color:var(--ink-2);border:1px solid var(--line)}
+  .delta-down{color:var(--crit-ink)}
+  .delta-up{color:var(--good-ink)}
+
+  .gauge-card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:22px clamp(18px,3vw,28px) 26px}
+  .gauge-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:26px}
+  .gauge-top .big{font-size:clamp(30px,5vw,46px);font-weight:800;letter-spacing:-.03em;line-height:1}
+  .gauge-top .big small{font-size:.42em;font-weight:600;color:var(--muted);letter-spacing:0}
+  .track{position:relative;height:16px;background:var(--card-2);border:1px solid var(--line);border-radius:100px;margin:38px 0 8px}
+  .band{position:absolute;top:-1px;bottom:-1px;background:var(--good-wash);border-left:2px dashed var(--good);border-right:2px dashed var(--good);border-radius:2px}
+  .band-lbl{position:absolute;top:-30px;font-family:var(--mono);font-size:11px;color:var(--good-ink);font-weight:600;white-space:nowrap;transform:translateX(-50%)}
+  .marker{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--crit);border:3px solid #fff;box-shadow:0 0 0 1px var(--crit);transform:translate(-50%,-50%);z-index:2}
+  .marker-lbl{position:absolute;top:26px;font-family:var(--mono);font-size:11px;color:var(--crit-ink);font-weight:700;white-space:nowrap;transform:translateX(-50%)}
+  .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:14px}
+  .gauge-note{margin-top:16px;font-size:13.5px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:14px;line-height:1.5}
+
+  .legend{display:flex;flex-wrap:wrap;gap:10px 22px;background:var(--card-2);border:1px solid var(--line);border-radius:8px;padding:13px 18px;margin-bottom:34px}
+  .legend .li{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink-2);max-width:30ch}
+  .tag{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:1px}
+  .tag-m{background:var(--accent-wash);color:var(--accent-ink)}
+  .tag-b{background:#EAE6FB;color:#5B3FB0}
+  .tag-i{background:var(--warn-wash);color:var(--warn-ink)}
+
+  .gaps{display:flex;flex-direction:column;gap:16px}
+  .gap{background:var(--card);border:1px solid var(--line);border-left-width:5px;border-radius:8px;padding:18px clamp(16px,2.5vw,24px)}
+  .gap.sev-crit{border-left-color:var(--crit)}
+  .gap.sev-warn{border-left-color:var(--warn)}
+  .gap.sev-low{border-left-color:var(--good)}
+  .gap-head{display:flex;gap:14px;align-items:flex-start}
+  .gap-rank{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--faint);padding-top:2px;min-width:24px}
+  .gap-title-row{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:4px}
+  .sev{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+  .sev-crit .sev,.sev.crit{background:var(--crit-wash);color:var(--crit-ink)}
+  .sev-warn .sev,.sev.warn{background:var(--warn-wash);color:var(--warn-ink)}
+  .sev-low .sev,.sev.low{background:var(--good-wash);color:var(--good-ink)}
+  .gap-body{font-size:14px;color:var(--ink-2);margin-top:6px;line-height:1.55}
+  .gap-body .ev{color:var(--muted);font-size:13px;margin-top:6px;display:block}
+  .fix{background:var(--accent-wash);border-radius:6px;padding:12px 14px;margin-top:12px;font-size:14px;color:var(--ink);line-height:1.5}
+  .fix .fx{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);font-weight:700;display:block;margin-bottom:4px}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px clamp(16px,2.5vw,22px)}
+  .panel h3{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .panel ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:11px}
+  .panel li{display:flex;gap:10px;font-size:14px;color:var(--ink-2);line-height:1.45}
+  .mk{font-weight:800;flex:none;line-height:1.4}
+  .mk-y{color:var(--good)}
+  .mk-n{color:var(--faint)}
+
+  .aud{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:20px clamp(18px,3vw,26px)}
+  .aud-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:start}
+  .bars{display:flex;flex-direction:column;gap:9px}
+  .bar-row{display:grid;grid-template-columns:170px 1fr 34px;align-items:center;gap:12px;font-size:13px}
+  .bar-row .lb{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar-track{background:var(--card-2);border-radius:100px;height:12px;overflow:hidden;border:1px solid var(--line)}
+  .bar-fill{height:100%;border-radius:100px;background:var(--accent);width:var(--w);animation:grow 1s cubic-bezier(.2,.7,.3,1) both}
+  .bar-fill.core{background:var(--accent)}
+  .bar-fill.tail{background:var(--faint)}
+  .bar-row .pc{font-family:var(--mono);font-weight:600;color:var(--muted);text-align:right;font-size:12.5px}
+  @keyframes grow{from{width:0}}
+  .aud-verdict .st-good{margin-bottom:12px}
+  .aud-verdict p{font-size:13.5px;color:var(--ink-2);line-height:1.55;margin-bottom:12px}
+  .aud-stat{display:flex;gap:7px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
+  .aud-stat b{font-size:20px;font-weight:800;letter-spacing:-.02em}
+  .aud-stat span{font-size:12.5px;color:var(--muted)}
+
+  .plan{background:var(--ink);border-radius:8px;padding:clamp(20px,3vw,30px);color:#E8EEF8}
+  .plan .eyebrow{color:#7FA1FF}
+  .plan h2{color:#fff;margin:.3em 0 4px}
+  .plan .psub{color:#98A6BD;font-size:14px;margin-bottom:22px;max-width:60ch}
+  .steps{display:flex;flex-direction:column;gap:2px}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:16px;padding:15px 0;border-top:1px solid #26313F;align-items:start}
+  .step:first-child{border-top:none}
+  .step-n{font-family:var(--mono);font-size:15px;font-weight:700;color:#8FB0FF}
+  .step .t{font-weight:700;color:#fff;font-size:15px;margin-bottom:3px}
+  .step .d{color:#A9B6CA;font-size:13.5px;line-height:1.5}
+  .skip{margin-top:20px;padding-top:16px;border-top:1px solid #26313F;font-size:13px;color:#8593A8}
+  .skip b{color:#C3CEDE;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+
+  footer{margin-top:44px;border-top:1px solid var(--line);padding-top:22px;font-size:12.5px;color:var(--muted);line-height:1.6}
+  footer .src{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  footer .src a{font-family:var(--mono);font-size:11px;background:var(--card);border:1px solid var(--line);border-radius:100px;padding:4px 11px;text-decoration:none;color:var(--ink-2)}
+  footer .src a:hover{border-color:var(--accent);color:var(--accent-ink)}
+
+  @media (max-width:720px){
+    .split{grid-template-columns:1fr}
+    .aud-grid{grid-template-columns:1fr;gap:20px}
+    .bar-row{grid-template-columns:130px 1fr 32px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .bar-fill{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <span class="eyebrow">LinkedIn Reach Diagnostic · 03 Jul 2026</span>
+    <h1>Why your reach is low — and the fix</h1>
+    <p class="lede">A data-backed teardown of one account: what the numbers actually say, the ranked causes, and a concrete play to expand distribution.</p>
+    <div class="meta-row">
+      <span class="chip"><span class="dot"></span> Aakash Srivastava · <b>AIO / GEO / SEO</b></span>
+      <span class="chip"><b class="tnum">2,652</b> followers</span>
+      <span class="chip">Sample post: <b class="tnum">78</b> impressions @ ~7h</span>
+    </div>
+  </header>
+
+  <div class="verdict">
+    <div class="rail"></div>
+    <span class="eyebrow">The one-line diagnosis</span>
+    <p class="verdict-head">Your content isn't the problem — <span class="hi">distribution is</span>, and it's shrinking.</p>
+    <p>People who see your posts engage at an above-average rate. Too few people see them. The sample post reached ~3% of your followers against a healthy band of 8–12%, and your whole account is down 24% week-over-week. Every fix below targets <b style="color:#EAF0FA">reach volume</b>, not writing quality.</p>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="idx">01</span><h2>What we measured</h2></div>
+    <p class="sec-sub">Pulled live from your LinkedIn analytics on 3 Jul 2026 (7-day window) plus the sample post's public counters.</p>
+    <div class="kpis">
+      <div class="tile">
+        <span class="cap">Engagement rate</span>
+        <span class="val tnum">~5%</span>
+        <span class="sub">4 interactions ÷ 78 impressions</span>
+        <span class="state st-good">● HEALTHY · avg is 5.2%</span>
+      </div>
+      <div class="tile">
+        <span class="cap">Post reach</span>
+        <span class="val tnum">~3%</span>
+        <span class="sub">of your 2,652 followers</span>
+        <span class="state st-crit">▼ vs 8–12% healthy</span>
+      </div>
+      <div class="tile">
+        <span class="cap">Impressions · 7d</span>
+        <span class="val tnum">1,079</span>
+        <span class="sub"><span class="delta-down">▼ 24%</span> vs prior 7 days</span>
+        <span class="state st-crit">● DECLINING</span>
+      </div>
+      <div class="tile">
+        <span class="cap">Members reached · 7d</span>
+        <span class="val tnum">486</span>
+        <span class="sub">~18% of followers</span>
+        <span class="state st-warn">● BELOW POTENTIAL</span>
+      </div>
+      <div class="tile">
+        <span class="cap">Follower growth</span>
+        <span class="val tnum">+1%</span>
+        <span class="sub">~24 net new this week</span>
+        <span class="state st-good">▲ STEADY</span>
+      </div>
+      <div class="tile">
+        <span class="cap">Profile views · 7d</span>
+        <span class="val tnum">185</span>
+        <span class="sub">51 search appearances</span>
+        <span class="state st-neutral">● FOR CONTEXT</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="idx">02</span><h2>The reach gap, to scale</h2></div>
+    <div class="gauge-card">
+      <div class="gauge-top">
+        <div>
+          <span style="font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)">Your sample post reached</span>
+          <div class="big tnum">2.9%<small> of followers (78 of 2,652)</small></div>
+        </div>
+        <div style="text-align:right">
+          <span style="font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--good-ink)">Healthy 2026 band</span>
+          <div class="big tnum" style="color:var(--good-ink)">8–12%<small style="color:var(--good-ink)"> = ~210–320 impressions</small></div>
+        </div>
+      </div>
+      <div class="track">
+        <div class="band" style="left:53.3%;width:26.7%"><span class="band-lbl" style="left:50%">Healthy band 8–12%</span></div>
+        <div class="marker" style="left:19.3%"></div>
+        <div class="marker-lbl" style="left:19.3%">You · 2.9%</div>
+      </div>
+      <div class="scale"><span>0%</span><span>5%</span><span>10%</span><span>15% of followers</span></div>
+      <p class="gauge-note">You're landing at roughly a third of the healthy floor. The engagement rate is fine, so the lever isn't "write better" — it's getting the post distributed to more of your network before the algorithm decides how far to push it.</p>
+    </div>
+  </section>
+
+  <div class="legend">
+    <div class="li"><span class="tag tag-m">Measured</span> Read directly from your LinkedIn analytics or the post's counters today.</div>
+    <div class="li"><span class="tag tag-b">Benchmark</span> From verified 2026 research (104-agent study, claims adversarially checked).</div>
+    <div class="li"><span class="tag tag-i">Inferred</span> A reasoned hypothesis — flagged, not asserted as fact.</div>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="idx">03</span><h2>Ranked gaps &amp; fixes</h2></div>
+    <p class="sec-sub">Ordered by expected impact on reach. Severity reflects how much each is likely holding you back.</p>
+    <div class="gaps">
+
+      <div class="gap sev-crit">
+        <div class="gap-head">
+          <span class="gap-rank">01</span>
+          <div>
+            <div class="gap-title-row"><h3>Format: text-only is the weakest format for reach</h3><span class="sev">Critical</span><span class="tag tag-b">Benchmark</span></div>
+            <p class="gap-body">On personal profiles, 2026 reach multipliers rank: polls <b>1.64×</b> › documents <b>1.45×</b> › images <b>1.18×</b> › video <b>1.10×</b> › <b>text-only 0.88×</b> (below baseline). Your post was pure text.
+            <span class="ev">Source: van der Blom, Algorithm Insights (personal-profile reach multipliers).</span></p>
+            <div class="fix"><span class="fx">Fix</span>Move your best insights into <b>native document carousels (~9 slides, short copy)</b> — the confirmed sweet spot. Keep an occasional poll for spike reach. When you do post text, lead with a hook + one native image.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap sev-crit">
+        <div class="gap-head">
+          <span class="gap-rank">02</span>
+          <div>
+            <div class="gap-title-row"><h3>Early comments — not likes — break the test batch</h3><span class="sev">Critical</span><span class="tag tag-b">Benchmark</span></div>
+            <p class="gap-body">LinkedIn shows a post to a slice of your network first, then expands <em>only if</em> signals are strong. The weighting is comments &amp; saves ≫ reactions. Your post earned just <b>1 comment</b>.
+            <span class="ev">Source: Sprout, Hootsuite, van der Blom (3-0 verified). The fixed "golden hour" timer was refuted — it's continuous test-then-expand.</span></p>
+            <div class="fix"><span class="fx">Fix</span>Within the first 60–90 min, reply fast and seed 2–3 genuine comments (you already did this with Somya — keep it up). End every post with <b>one sharp question</b>, not a generic "thoughts?".</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap sev-warn">
+        <div class="gap-head">
+          <span class="gap-rank">03</span>
+          <div>
+            <div class="gap-title-row"><h3>Dwell time is the #1 confirmed ranking signal</h3><span class="sev">High</span><span class="tag tag-b">Benchmark</span></div>
+            <p class="gap-body">Plain text gets a 2-second scan; carousels and video hold attention far longer. Dwell time is the <b>only</b> mechanism LinkedIn officially confirms in its own engineering research.
+            <span class="ev">Source: LinkedIn Engineering — feed dwell-time ranking (first-party).</span></p>
+            <div class="fix"><span class="fx">Fix</span>This is <em>why</em> format matters so much — swipeable documents rack up dwell. Use a strong hook, generous line breaks, and put the payoff <b>mid-post</b> so people stop and read instead of scrolling past.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap sev-warn">
+        <div class="gap-head">
+          <span class="gap-rank">04</span>
+          <div>
+            <div class="gap-title-row"><h3>Inconsistent cadence + a declining trend</h3><span class="sev">High</span><span class="tag tag-m">Measured</span></div>
+            <p class="gap-body">Your impressions are down <b>24% WoW</b>, and LinkedIn itself is nudging you to "post weekly for 4× profile views." Distribution trust erodes without a steady rhythm.
+            <span class="ev">Note: the specific "3–5 posts/week sweet spot" stat was refuted in verification — so this is about consistency, not a magic frequency.</span></p>
+            <div class="fix"><span class="fx">Fix</span>Post <b>2–4× per week, consistently</b>, on the same core topics (SEO / GEO / AI-search) so the algorithm learns who to show you to. Rhythm beats volume.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap sev-low">
+        <div class="gap-head">
+          <span class="gap-rank">05</span>
+          <div>
+            <div class="gap-title-row"><h3>Audience is fragmented (minor drag)</h3><span class="sev">Low</span><span class="tag tag-m">Measured</span></div>
+            <p class="gap-body">Your top job title is only 4% of followers, and ~17% are core SEO/marketing. The random test-batch therefore includes non-SEO people who won't engage with SEO posts — a small early-signal drag. <b>This is NOT a quality problem</b> — your audience is relevant and senior.
+            <span class="ev">See the audience panel below.</span></p>
+            <div class="fix"><span class="fx">Fix</span>Keep doing what's working: steady growth (+1%/wk) and commenting in SEO/GEO circles to concentrate your following. No drastic action needed.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="idx">04</span><h2>Keep vs. ignore</h2></div>
+    <div class="split">
+      <div class="panel">
+        <h3><span class="mk mk-y">✓</span> Already doing right</h3>
+        <ul>
+          <li><span class="mk mk-y">✓</span><span><b>No outbound link in the post body.</b> Link posts are the lowest-reach format (~3.25–3.7%). You avoided the single biggest reach-killer — put sources in the first comment.</span></li>
+          <li><span class="mk mk-y">✓</span><span><b>Strong, specific hook</b> + above-average engagement rate. The writing genuinely isn't the problem.</span></li>
+          <li><span class="mk mk-y">✓</span><span><b>Quality audience:</b> 42% Senior, ~17% core SEO/marketing, steady +1%/week growth.</span></li>
+          <li><span class="mk mk-y">✓</span><span><b>Fast replies to commenters</b> — exactly the behavior that expands reach.</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3><span class="mk mk-n">✕</span> Don't waste effort on</h3>
+        <ul>
+          <li><span class="mk mk-n">✕</span><span><b>Hashtag tuning.</b> No reliable 2026 reach effect survived verification — 3 vs 5 hashtags won't move it.</span></li>
+          <li><span class="mk mk-n">✕</span><span><b>Chasing a "golden hour" timer.</b> Refuted — distribution is continuous test-then-expand, not a 60-minute gate.</span></li>
+          <li><span class="mk mk-n">✕</span><span><b>Obsessing over exact time-of-day.</b> No reliable 2026 optimum established; consistency beats clock-watching.</span></li>
+          <li><span class="mk mk-n">✕</span><span><b>Buying reach with volume.</b> Posting more often without better format/dwell just spreads the same weak signal thinner.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="idx">05</span><h2>Who actually follows you</h2></div>
+    <p class="sec-sub">Live from Audience analytics. This overturned an earlier hunch that your audience was off-target — it isn't.</p>
+    <div class="aud">
+      <div class="aud-grid">
+        <div>
+          <span style="font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)">Top job titles · % of followers (0–10% scale)</span>
+          <div class="bars" style="margin-top:14px">
+            <div class="bar-row"><span class="lb">SEO Specialist</span><span class="bar-track"><span class="bar-fill core" style="--w:40%"></span></span><span class="pc">4%</span></div>
+            <div class="bar-row"><span class="lb">Founder</span><span class="bar-track"><span class="bar-fill tail" style="--w:40%"></span></span><span class="pc">4%</span></div>
+            <div class="bar-row"><span class="lb">SEO Manager</span><span class="bar-track"><span class="bar-fill core" style="--w:40%"></span></span><span class="pc">4%</span></div>
+            <div class="bar-row"><span class="lb">SEO Executive</span><span class="bar-track"><span class="bar-fill core" style="--w:40%"></span></span><span class="pc">4%</span></div>
+            <div class="bar-row"><span class="lb">Digital Marketing Mgr</span><span class="bar-track"><span class="bar-fill core" style="--w:30%"></span></span><span class="pc">3%</span></div>
+            <div class="bar-row"><span class="lb">Digital Marketing Exec</span><span class="bar-track"><span class="bar-fill core" style="--w:20%"></span></span><span class="pc">2%</span></div>
+            <div class="bar-row"><span class="lb">Co-Founder</span><span class="bar-track"><span class="bar-fill tail" style="--w:20%"></span></span><span class="pc">2%</span></div>
+            <div class="bar-row"><span class="lb">Software Engineer</span><span class="bar-track"><span class="bar-fill tail" style="--w:20%"></span></span><span class="pc">2%</span></div>
+            <div class="bar-row"><span class="lb">HR Manager</span><span class="bar-track"><span class="bar-fill tail" style="--w:20%"></span></span><span class="pc">2%</span></div>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:12px;font-family:var(--mono)"><span style="color:var(--accent)">■</span> core SEO/marketing &nbsp; <span style="color:var(--faint)">■</span> adjacent / off-topic tail</p>
+        </div>
+        <div class="aud-verdict">
+          <span class="state st-good" style="font-family:var(--mono);font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px">● HYPOTHESIS RETRACTED</span>
+          <p>Your largest cluster <em>is</em> your niche — SEO roles (~12%) plus digital marketing (~5%) = <b>~17% core practitioners</b> (~450 people), and 42% are Senior. No junk audience.</p>
+          <div class="aud-stat"><b class="tnum">42%</b><span>Senior seniority</span></div>
+          <div class="aud-stat"><b class="tnum">42%</b><span>Greater Delhi Area — India-centric</span></div>
+          <div class="aud-stat"><b class="tnum">19%</b><span>IT Services &amp; Consulting (top industry)</span></div>
+          <p style="margin-top:14px"><span class="tag tag-i" style="margin-right:6px">Watch</span>The real mismatch is <b>geography</b>, not quality: your audience is India-heavy while your market is the UAE. It doesn't hurt reach, but decide whether you're building a personal SEO brand (fine) or UAE-market authority (attract more Gulf followers).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="plan">
+      <span class="eyebrow">The play</span>
+      <h2>Your next 7 days</h2>
+      <p class="psub">A prioritized sequence — top items move reach the most. Run it for two weeks and re-check the 7-day impressions trend.</p>
+      <div class="steps">
+        <div class="step"><span class="step-n">1</span><div><div class="t">Ship one document carousel</div><div class="d">Turn your strongest SEO/GEO insight (e.g. the "citation share" idea) into a ~9-slide native carousel. Highest-reach format available to you (1.45×) and it maximizes dwell time.</div></div></div>
+        <div class="step"><span class="step-n">2</span><div><div class="t">Engineer the first 90 minutes</div><div class="d">Post when you can be present. Reply to every comment fast, seed 2–3 real ones, and close the post with a single pointed question. This is what triggers expansion beyond the test batch.</div></div></div>
+        <div class="step"><span class="step-n">3</span><div><div class="t">Keep links out of the body</div><div class="d">If you're citing a source or your own article, drop it in the first comment — never the post body.</div></div></div>
+        <div class="step"><span class="step-n">4</span><div><div class="t">Lock a 2–4×/week rhythm</div><div class="d">Same core topics, steady cadence, to rebuild the 24% you've lost and teach the algorithm who to show you to.</div></div></div>
+        <div class="step"><span class="step-n">5</span><div><div class="t">Concentrate the audience daily</div><div class="d">Comment substantively on 3–5 SEO/GEO peers' posts a day. Compounds your ~17% core and sharpens every future test batch.</div></div></div>
+      </div>
+      <p class="skip"><b>Skip entirely:</b> &nbsp;hashtag counts · best-time-of-day tuning · posting more without better format. None of these survived verification as reach levers.</p>
+    </div>
+  </section>
+
+  <footer>
+    <strong style="color:var(--ink)">Method &amp; integrity.</strong> Account metrics were read live from your LinkedIn analytics on 3 Jul 2026 and the sample post's public counters — labeled <span class="tag tag-m" style="padding:1px 6px">Measured</span>. Reach mechanics and benchmarks come from a 104-agent deep-research pass with claims adversarially verified (8 popular claims were <em>refuted</em> and excluded) — labeled <span class="tag tag-b" style="padding:1px 6px">Benchmark</span>. Benchmark figures skew toward company-page datasets + van der Blom's personal-profile multipliers, so they contextualize your numbers rather than measure your exact profile.
+    <div class="src">
+      <a href="https://www.linkedin.com/posts/richardvanderblom_chapter-1-algorithm-insights-report-2025-activity-7322514599126130688-Q895">van der Blom · Algorithm Insights</a>
+      <a href="https://engineering.linkedin.com/blog/2020/understanding-feed-dwell-time">LinkedIn Engineering · Dwell time</a>
+      <a href="https://www.socialinsider.io/social-media-benchmarks/linkedin">Socialinsider · Benchmarks</a>
+      <a href="https://sproutsocial.com/insights/linkedin-algorithm/">Sprout Social · Algorithm</a>
+      <a href="https://blog.hootsuite.com/linkedin-algorithm/">Hootsuite · Algorithm</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

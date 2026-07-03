@@ -1,0 +1,22 @@
+# Secrets — NEVER commit real credentials
+linkedin-api.env
+*.env
+!*.env.example
+.config/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Skill packaging / local state
+*.skill
+.superpowers/

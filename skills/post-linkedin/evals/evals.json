@@ -1,0 +1,101 @@
+{
+  "skill_name": "post-linkedin",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write me a LinkedIn post about how AI Overviews are killing organic traffic for SEO professionals. I've seen my clients lose 30-40% CTR in the last 6 months and want to share this with my network.",
+      "expected_output": "A LinkedIn post with: strong hook referencing the CTR drop, 3-5 scraped sources cited in research, storytelling arc showing before/after, specific data points, engagement CTA, 3-5 SEO hashtags. Plus an engagement analysis scorecard.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "has-hook-line",
+          "description": "Post opens with a strong hook (not starting with 'I'), under 15 words"
+        },
+        {
+          "name": "has-sources-cited",
+          "description": "At least 3 authoritative sources were scraped and referenced in the research summary"
+        },
+        {
+          "name": "has-hashtags",
+          "description": "Post includes 3-5 relevant hashtags at the end"
+        },
+        {
+          "name": "has-cta",
+          "description": "Post ends with a specific question CTA (not just 'thoughts?')"
+        },
+        {
+          "name": "has-engagement-scorecard",
+          "description": "Skill produces an engagement analysis with numerical scores (1-10) across at least 4 dimensions"
+        },
+        {
+          "name": "word-count-appropriate",
+          "description": "Post body is between 120-280 words (LinkedIn sweet spot)"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I want a LinkedIn post about how I use Claude and ChatGPT in my daily work life as a digital marketer. Something authentic and relatable — not just a list of tools.",
+      "expected_output": "A personal, first-person LinkedIn post with a narrative/storytelling angle about AI in daily professional life. Should feel authentic, reference real use cases, include scraped data on AI adoption in the workplace, and have a CTA inviting the audience to share their own experience.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "has-hook-line",
+          "description": "Post opens with a strong hook that is not a generic statement"
+        },
+        {
+          "name": "has-sources-cited",
+          "description": "Research phase surfaced at least 3 sources on AI productivity/daily use"
+        },
+        {
+          "name": "has-personal-narrative",
+          "description": "Post uses first-person voice and includes a concrete personal scenario or workflow"
+        },
+        {
+          "name": "has-hashtags",
+          "description": "Post includes 3-5 appropriate hashtags from the ai-life hashtag bank"
+        },
+        {
+          "name": "has-engagement-scorecard",
+          "description": "Engagement analysis scorecard is present with scores and a rewrite suggestion"
+        },
+        {
+          "name": "avoids-corporate-jargon",
+          "description": "Post avoids hollow phrases like 'game-changer', 'revolutionize', 'synergy'"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a LinkedIn post about vibe coding. I built a full internal dashboard in one weekend using Claude Code and zero prior React experience. Want to share it but not sound too braggy.",
+      "expected_output": "A humble-brag style LinkedIn post about vibe coding, grounded in the user's real story. Should use a Before/After/Bridge narrative, reference scraped data on non-programmers building with AI, include specific details about what was built, and invite others to share their own AI building experiences.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "has-hook-line",
+          "description": "Opening line is punchy and references vibe coding or building without experience"
+        },
+        {
+          "name": "has-sources-cited",
+          "description": "Research phase surfaced at least 3 sources on vibe coding or AI development trends"
+        },
+        {
+          "name": "uses-before-after-structure",
+          "description": "Post has a clear before/after narrative structure showing contrast"
+        },
+        {
+          "name": "has-hashtags",
+          "description": "Post includes VibeCoding or related hashtags"
+        },
+        {
+          "name": "has-engagement-scorecard",
+          "description": "Engagement scorecard is present with an A/B test suggestion for an alternate hook"
+        },
+        {
+          "name": "not-braggy-tone",
+          "description": "Post tone is humble/curious rather than boastful — invites rather than lectures"
+        }
+      ]
+    }
+  ]
+}
