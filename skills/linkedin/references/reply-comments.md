@@ -9,7 +9,7 @@ description: >
   comments on my LinkedIn posts", "reply to my LinkedIn comments", "who
   commented on my latest post", "draft replies to the comments on my post", or
   the slash command /post-linkedin-posts-comment. This is for the user's OWN
-  posts; use post-linkedin-feed-comments for commenting on other people's posts
+  posts; use references/feed-comments.md for commenting on other people's posts
   in the home feed.
 user-invokable: true
 argument-hint: "[optional: a specific post URL, or 'latest']"
@@ -27,7 +27,7 @@ and posts each only **after you approve it**.
 
 This skill is self-contained. For the complete background — DOM quirks, URL formats,
 voice guide, and safety rules — read
-`~/.claude/skills/post-linkedin/references/engage-and-comment.md` (Steps 0-2, Voice,
+`~/.claude/skills/linkedin/references/engage-and-comment.md` (Steps 0-2, Voice,
 Safety). The essentials are inline below.
 
 ## Critical: use the browser, NOT the API
@@ -109,8 +109,13 @@ data-driven, arrows (`→`) for lists, ends with a specific question, no corpora
 1-2 emojis max. Replies are **1-4 short lines** and carry **no hashtags**. A strong reply
 **engages the specific point** made (not "Great post!"), **adds one concrete thing** (a
 data point, counter-example, sharper framing), and often **ends with a question** back to
-keep the thread alive. Never sycophantic. See `post-linkedin/references/post-formats.md`
+keep the thread alive. Never sycophantic. See `references/post-formats.md`
 for tone.
+
+**Formatting — single line breaks ONLY.** LinkedIn comments render every newline as a
+full-height paragraph block, so a blank line (`\n\n`) becomes a tall empty row and the
+reply looks stretched with uneven gaps. Separate lines with a single `\n` (or write one
+compact paragraph). Never use post-style blank-line spacing in a comment or reply.
 
 ## Safety
 

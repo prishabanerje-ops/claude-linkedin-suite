@@ -1,21 +1,28 @@
 # claude-linkedin-suite
 
-Portable **Claude Code** skills for LinkedIn — write & publish posts, comment on
-your feed, and reply to comments on your own posts. Clone onto any machine and
-run one command to get all three `/post-linkedin*` commands working.
+Portable **Claude Code** skill for LinkedIn — write & publish posts, comment on
+your feed, reply to comments on your own posts, and track replies to comments
+you left elsewhere. Clone onto any machine and run one command to get the
+`/linkedin` hub working.
 
 ## What's inside
 
 ```
 skills/
-  post-linkedin/                  Write + publish posts (text or image), score for engagement
-    SKILL.md
-    references/                   post-formats, source-domains, engage-and-comment guides
-    scripts/                      linkedin_post.py, linkedin_image.py (+ tests)
-  post-linkedin-feed-comments/    Comment on 2–3 relevant posts in your home feed
-  post-linkedin-posts-comment/    Reply to comments on your own posts
+  linkedin/                        Unified LinkedIn hub — four modes, one skill
+    SKILL.md                       WRITE mode: research, draft, score, publish (text / auto-image / bring-your-own-image)
+    references/
+      feed-comments.md             FEED ENGAGE mode: comment on 2–3 relevant posts in your home feed
+      reply-comments.md            REPLY mode: reply to comments on your own posts
+      check-comment-replies.md     CHECK REPLIES mode: find & answer replies to comments you left on others' posts
+      engage-and-comment.md        Shared DOM/voice/safety background for the three comment modes
+      post-formats.md              Hook patterns, storytelling templates, CTA/hashtag banks
+      source-domains.md            Authoritative sources per content pillar
+    scripts/                       linkedin_post.py, linkedin_image.py (+ tests)
+    data/                          posted-log.jsonl (anti-repetition ledger), comments-log.jsonl (outbound-comment ledger)
+    evals/evals.json
 config/
-  linkedin-api.env.example        Credentials template (copy to ~/.config/linkedin-api.env)
+  linkedin-api.env.example         Credentials template (copy to ~/.config/linkedin-api.env)
 docs/
   2026-07-03-linkedin-reach-optimization-design.md   Roadmap PRD (reach optimization)
   reach-scorecard.html            Account reach diagnostic (private analytics)
@@ -41,7 +48,7 @@ git clone git@github.com:<your-github-username>/claude-linkedin-suite.git ~/clau
 ```
 
 The installer:
-1. Copies each skill into `~/.claude/skills/` (backing up any existing copy).
+1. Copies the skill into `~/.claude/skills/linkedin` (backing up any existing copy).
 2. Creates `~/.config/linkedin-api.env` from the template if it doesn't exist.
 3. Confirms Python 3 + the stdlib are present (no pip install needed).
 
@@ -57,39 +64,54 @@ Edit `~/.config/linkedin-api.env` and fill in:
 Your token lives **only** on your machine in that file — it is git-ignored and
 never committed. See `config/linkedin-api.env.example` for how to obtain each.
 
-## The commands
+## The modes
 
-| Command | Does |
-|---------|------|
-| `/post-linkedin` | Research-backed post on SEO+AI / AI-in-daily-life / vibe-coding pillars, engagement scorecard, then publishes text or one auto-generated image via the API. |
-| `/post-linkedin-feed-comments` | Drives your logged-in Chrome to scan the home feed and comment on 2–3 relevant posts (per-item approval). |
-| `/post-linkedin-posts-comment` | Drives your logged-in Chrome to read and reply to comments on your own posts (per-item approval). |
+All four live under one skill — `/linkedin`. Say what you want and it routes itself
+(or ask explicitly):
 
-**Publishing** (`/post-linkedin`) uses LinkedIn's API + your token — no browser needed.
-**Commenting** skills use **browser automation** (Chrome DevTools MCP) on a Chrome
-profile already **signed into LinkedIn** — the API can't read feeds or post comments.
+| Mode | Trigger | Does |
+|---|---|---|
+| **write** (default) | "write me a LinkedIn post about X" | Research-backed post on SEO+AI / AI-in-daily-life / vibe-coding pillars, novelty check against `data/posted-log.jsonl`, engagement scorecard, then publishes text, one auto-generated image, or a bring-your-own image (with an image-gen prompt handed to you) via the API. |
+| **feed engage** | "comment on relevant posts in my feed" | Drives your logged-in Chrome to scan the home feed and comment on 2–3 relevant posts (per-item approval); logs each to `data/comments-log.jsonl`. |
+| **reply** | "check the comments on my LinkedIn posts" | Drives your logged-in Chrome to read and reply to comments on your own posts (per-item approval). |
+| **check replies** | "any replies to my comments?" | Sweeps `data/comments-log.jsonl` + your notifications page for replies to comments you left on *others'* posts, and answers them (per-item approval). |
+
+Every `/linkedin` invocation opens with a one-line reminder if any outbound
+comment thread is still open, so a question you asked an author never goes
+unanswered.
+
+**Publishing** (write mode) uses LinkedIn's API + your token — no browser needed.
+**Comment modes** (feed engage / reply / check replies) use **browser automation**
+(Chrome DevTools MCP) on a Chrome profile already **signed into LinkedIn** — the
+API can't read feeds, comments, or notifications.
 
 ## Requirements
 
 - **Python 3.9+** (standard library only for the current skills).
-- **Claude Code** with the skills in `~/.claude/skills/` (the installer handles this). Restart Claude Code after installing so it discovers them.
-- For the comment skills: **Chrome** signed into LinkedIn + the **Chrome DevTools MCP** available in your Claude Code session.
+- **Claude Code** with the skill in `~/.claude/skills/linkedin` (the installer handles this). Restart Claude Code after installing so it discovers it.
+- For the comment modes: **Chrome** signed into LinkedIn + the **Chrome DevTools MCP** available in your Claude Code session.
 
 ## Updating
 
-Re-run the one-command install — it backs up your existing skill copies to
+Re-run the one-command install — it backs up your existing skill copy to
 `~/.claude/skills/.backup-<timestamp>/` before overwriting, and leaves your
 credentials file untouched.
 
 ## Security
 
 - **No secrets in this repo.** The access token stays in `~/.config/linkedin-api.env` (git-ignored).
-- `docs/reach-scorecard.html` and the PRD contain **your own account analytics** — a reason this repo is **private**. Keep it that way.
-- Every skill posts/comments **only after your explicit approval** and verifies before claiming success.
+- `docs/reach-scorecard.html`, the PRD, and `skills/linkedin/data/*.jsonl` contain
+  **your own account analytics and activity history** — a reason this repo is
+  **private**. Keep it that way.
+- Every mode posts/comments **only after your explicit approval** and verifies before claiming success.
 
 ## Roadmap
 
-`docs/2026-07-03-linkedin-reach-optimization-design.md` is the PRD to re-tool
-these skills around verified 2026 reach mechanics — document carousels
-(highest-reach format the API supports), comment-pull CTAs, links-in-first-comment,
-a reach-scoring engagement scorecard, and a shared reach playbook. Not yet built.
+`docs/2026-07-03-linkedin-reach-optimization-design.md` is the original PRD for
+retooling these skills around verified 2026 reach mechanics. Since it was written,
+several of its concerns have been addressed directly in the skill: an
+anti-repetition ledger gates same-topic posts, a bring-your-own-image path covers
+photorealistic generators, and the check-replies mode closes the loop on outbound
+engagement. Document carousels and a shared reach playbook remain open ideas —
+see `git log` on `skills/linkedin/SKILL.md` for the detailed history of what's
+shipped.

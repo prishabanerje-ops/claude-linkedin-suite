@@ -1,6 +1,6 @@
 # LinkedIn Engagement — Reply to Comments & Comment on the Feed
 
-This is the **engage mode** of the `post-linkedin` skill. Where the main skill *writes*
+This is the **engage mode** of the `linkedin` skill. Where the main skill *writes*
 new posts, this workflow *interacts* with existing LinkedIn content on the user's behalf:
 
 1. **Check comments** on the user's own recent posts.

@@ -25,6 +25,15 @@ LINKEDIN_VERSION = "202506"
 SUPPORTED_IMAGE_EXT = {".png", ".jpg", ".jpeg"}
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
 
+# LinkedIn parses `commentary` as "little text format"; these reserved chars
+# must be backslash-escaped or the API silently truncates/mangles the post.
+# `#` is deliberately NOT escaped so hashtags keep working.
+LITTLE_TEXT_RESERVED = "\\|{}@[]()<>*_~"
+
+
+def escape_little_text(text: str) -> str:
+    return "".join("\\" + ch if ch in LITTLE_TEXT_RESERVED else ch for ch in text)
+
 
 def load_env(path: Path) -> dict:
     env = {}
@@ -51,40 +60,13 @@ def validate_image(path):
         raise ValueError(f"Image too large ({size} bytes); must be < 5 MB")
 
 
-# Characters reserved by LinkedIn's "little text format" for the Posts API
-# commentary field. If left unescaped, LinkedIn accepts the call (201) but
-# DROPS everything after the first reserved char (e.g. an unescaped "(" causes
-# the rest of the post to be silently truncated). '#' is intentionally NOT in
-# this set: bare "#word" is a valid HashtagElement and must stay unescaped to
-# render as a clickable hashtag. Mentions (@[..](urn)) aren't used by this skill.
-# Ref: learn.microsoft.com/.../shares/little-text-format  (Text grammar).
-_LITTLE_RESERVED = set("|{}@[]()<>*_~")
-
-
-def escape_commentary(text: str) -> str:
-    """Backslash-escape little-format reserved chars so the full post renders.
-
-    Backslash itself is escaped first (to \\\\), then the remaining reserved
-    punctuation. Bare '#hashtags' are preserved so they stay clickable.
-    """
-    out = []
-    for ch in text:
-        if ch == "\\":
-            out.append("\\\\")
-        elif ch in _LITTLE_RESERVED:
-            out.append("\\" + ch)
-        else:
-            out.append(ch)
-    return "".join(out)
-
-
 def build_post_payload(text, person_id, image_urn=None, alt_text=None):
     """Build the /rest/posts request body. Adds content.media iff image_urn."""
     payload = {
         "author": f"urn:li:person:{person_id}",
         "lifecycleState": "PUBLISHED",
         "visibility": "PUBLIC",
-        "commentary": escape_commentary(text),
+        "commentary": escape_little_text(text),
         "distribution": {
             "feedDistribution": "MAIN_FEED",
             "targetEntities": [],

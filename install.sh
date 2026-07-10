@@ -75,16 +75,17 @@ fi
 echo
 bold "Done."
 echo
-echo "Installed commands (usable in Claude Code on this machine):"
-echo "   /post-linkedin                 write & publish posts (text / image)"
-echo "   /post-linkedin-feed-comments   comment on relevant posts in your feed"
-echo "   /post-linkedin-posts-comment   reply to comments on your own posts"
+echo "Installed: /linkedin (four modes, usable in Claude Code on this machine):"
+echo "   write         write & publish posts (text / auto-image / bring-your-own-image)"
+echo "   feed engage   comment on relevant posts in your feed"
+echo "   reply         reply to comments on your own posts"
+echo "   check replies find & answer replies to comments you left on others' posts"
 echo
 echo "Next steps:"
 echo "   1. Add your credentials:   \$EDITOR $ENV_DEST"
-echo "   2. (Comment skills only) sign into LinkedIn in Chrome — they drive a"
+echo "   2. (Comment modes only) sign into LinkedIn in Chrome — they drive a"
 echo "      logged-in browser via the Chrome DevTools MCP."
-echo "   3. Restart Claude Code so it picks up the new skills, then run /post-linkedin"
+echo "   3. Restart Claude Code so it picks up the new skill, then run /linkedin"
 echo
 echo "Verify publishing works (optional):"
-echo "   python3 \"$SKILLS_DEST/post-linkedin/scripts/linkedin_post.py\" \"Hello from a new machine\""
+echo "   python3 \"$SKILLS_DEST/linkedin/scripts/linkedin_post.py\" \"Hello from a new machine\""

@@ -11,7 +11,7 @@ description: >
   on relevant posts in my feed", "engage with my LinkedIn feed", "find posts in
   my feed worth commenting on", "scan my feed and comment", or the slash command
   /post-linkedin-feed-comments. For replying to comments on the user's OWN posts,
-  use post-linkedin-posts-comment instead.
+  use references/reply-comments.md instead.
 user-invokable: true
 argument-hint: "[optional: topic/filter, or how many posts]"
 metadata:
@@ -28,7 +28,7 @@ it**. Default cap: **2-3 comments per run** (more than that trips LinkedIn's aut
 defenses and reads as spam).
 
 This skill is self-contained. For the complete background — DOM quirks, voice guide, and
-safety rules — read `~/.claude/skills/post-linkedin/references/engage-and-comment.md`
+safety rules — read `~/.claude/skills/linkedin/references/engage-and-comment.md`
 (Step 3, Voice, Safety). The essentials are inline below.
 
 ## Critical: use the browser, NOT the API
@@ -98,6 +98,13 @@ then click the **Post** submit button from the latest snapshot. **Verify** by re
 you can't reliably find the editor/submit after a couple tries, **fall back**: type the
 text into the box and ask the user to click Post — and say clearly you didn't submit.
 
+**Log every posted comment** — append one line to `data/comments-log.jsonl`:
+```json
+{"date":"YYYY-MM-DD","post_urn":"urn:li:activity:...","post_author":"Name (headline)","post_gist":"<one line>","comment_first_line":"<first line of your comment>","asked_question":true,"status":"open"}
+```
+This ledger is what `references/check-comment-replies.md` sweeps to find replies to
+your comments later — an unlogged comment is a conversation nobody will follow up on.
+
 ## Voice
 
 Match the user's own style (read 3-5 of their recent posts to calibrate): short punchy
@@ -106,9 +113,14 @@ jargon, 1-2 emojis max. Comments are **1-4 short lines** and carry **no hashtags
 strong comment **engages the specific point** the author made (not "Great post!"), **adds
 one concrete thing** (a data point, counter-example, sharper framing, or lived
 observation), and often **ends with a question** to keep the conversation going. Sound
-like a peer talking shop — never sycophantic, never salesy. See
-`post-linkedin/references/post-formats.md` for tone and
-`post-linkedin/references/source-domains.md` if you need a credible stat.
+like a peer talking shop — never sycophantic, never salesy.
+
+**Formatting — single line breaks ONLY.** Unlike posts, LinkedIn comments render every
+newline as a full-height paragraph block, so a blank line (`\n\n`) becomes a tall empty
+row and the comment looks stretched with uneven gaps. Separate lines with a single `\n`
+(or write one compact paragraph). Never use post-style blank-line spacing in a comment. See
+`references/post-formats.md` for tone and
+`references/source-domains.md` if you need a credible stat.
 
 ## Safety
 
